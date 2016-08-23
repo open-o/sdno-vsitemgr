@@ -11,7 +11,8 @@ import tornado.gen
 import json
 import threading
 import traceback
-
+import os
+import os.path
 from topofetch import *
 from jsonrpc import *
 from microsrvurl import *
@@ -112,7 +113,7 @@ class vsite_get_handler(base_handler):
         """
             @param vsite_uids:
             @type vsite_uids: L{string}
-            @in vsite_uids: query
+            @in vsite_uids: path
             @required vsite_uids: False
 
             @rtype: list of vsites
@@ -128,14 +129,13 @@ class vsite_get_handler(base_handler):
             the available vsites.
             @notes: GET vsite/abc,def or  GET vsite/
         """
-        if input:
+        if vsite_uids:
             args = {'uids':[x for x in vsite_uids.split(',')]}
         else:
             args = {}
         vsites = {}
         resp = yield self.do_query(microsrv_cust_url,'ms_cust_get_customer', args )
         try:
-            resp = json.loads(resp)
             result = resp['result']
             vsites = {'vsites':result['customers']} if 'customers' in result else {}
         except:
@@ -150,12 +150,13 @@ class vsite_get_handler(base_handler):
         """
             @param vsite_uids:
             @type vsite_uids: L{string}
-            @in vsite_uids: query
+            @in vsite_uids: path
             @required vsite_uids: True
 
 
             @description: Delete a vsite.
             @notes: DELETE vsite/abc
+            @return 200: deleted ok.
         """
         args = {'uids':[x for x in vsite_uids.split(',')]}
         resp = yield self.do_query(microsrv_cust_url,'ms_cust_del_customer', args)
@@ -168,7 +169,13 @@ class vsite(object):
         self.name = name
         self.ips = ips
 
-
+@swagger.model()
+class flow(object):
+    def __init__(self, vsite_uid, src_ip, dst_ip = '', uid = None):
+        self.vsite_uid = vsite_uid
+        self.src_ip = src_ip
+        self.dst_ip = dst_ip
+        self.uid = uid
 
 class vsite_post_handler(base_handler):
     def initialize(self):
@@ -190,7 +197,10 @@ class vsite_post_handler(base_handler):
 
             @description: Add a new vsite
             @notes: POST vsite/
+            <br /> request body sample <br />
+            {"ips": [{"src": "10.0.218.0/24"}], "name": "vsite_sample"}
         """
+        vsite = {}
         uid = {}
         try:
             vsite = json.loads(self.request.body)
@@ -198,7 +208,6 @@ class vsite_post_handler(base_handler):
             pass
 
         resp = yield  self.do_query(microsrv_cust_url, 'ms_cust_add_customer', vsite)
-        resp = json.loads(resp)
         result = resp['result']
         if 'cust_uid' in result:
             uid['vsite_uid'] = result['cust_uid']
@@ -215,6 +224,9 @@ class vsite_post_handler(base_handler):
             @return 200: vsite was updated.
             @raise 500: invalid input
             @description: update a vsite
+            @notes: PUT vsite/
+            <br /> request body sample <br />
+            {"ips": [{"src": "10.0.218.0/24"}], "uid":"19","name": "vsite_sample_2"}
         '''
         try:
             vsite = json.loads(self.request.body)
@@ -225,6 +237,91 @@ class vsite_post_handler(base_handler):
         self.write('')
         self.finish()
 
+class flow_get_handler(base_handler):
+    @tornado.gen.coroutine
+    @swagger.operation(nickname='delete_flow')
+    def delete(self, flow_uids):
+        """
+            @param flow_uids:
+            @type flow_uids: L{string}
+            @in flow_uids: path
+            @required flow_uids: True
+
+            @rtype:
+
+            @description: Delete flow spec from a vsite.
+            @notes: DELETE flow/xxx,yyy
+            @return 200: deleted ok.
+        """
+        fids = flow_uids.split(',')
+        resp = self.do_query(microsrv_cust_url, 'ms_cust_del_flow', {'flow_uids':fids})
+        self.write('')
+        self.finish()
+    pass
+
+class flow_post_handler(base_handler):
+    @tornado.gen.coroutine
+    @swagger.operation(nickname='add_flow')
+    def post(self):
+        """
+            @param body: create flow spec for a vsite
+            @type body: L{flow}
+            @in body: body
+
+            @rtype: {"flow_uid":""}
+            The unique id of the new added flow spec  <br />
+
+
+            @description: Add a new flow spec
+            @notes: POST flow/
+            @notes:
+            <br /> request body sample <br />
+            {"src_ip": "192.168.212.0/24", "dst_ip":"","vsite_uid": "19"}
+        """
+        rpc_flow = None
+        try:
+            flow = json.loads(self.request.body)
+            rpc_flow = {'cust_uid':flow['vsite_uid'], 'flows':[{'src':flow['src_ip'],
+                                'dst':flow['dst_ip'] if 'dst_ip' in flow else ''}]}
+        except:
+            pass
+
+        uid = {}
+        if rpc_flow:
+            resp = yield  self.do_query(microsrv_cust_url, 'ms_cust_add_flow', rpc_flow)
+            result = resp['result']
+            if 'flows' in result:
+                uid['flow_uid'] = result['flows'][0]['uid']
+        self.write(json.dumps(uid))
+        self.finish()
+
+    @tornado.gen.coroutine
+    @swagger.operation(nickname='update_flow')
+    def put(self):
+        '''
+            @param body: update a flow
+            @type body: L{flow}
+            @in body: body
+            @return 200: flow was updated.
+            @raise 500: invalid input
+            @description: update a flow. Note that the 'uid' attribute of the flow is mandatory for this API.
+            @notes:
+            <br /> request body sample <br />
+            {"src_ip": "192.111.218.0/24", "dst_ip":"", "uid": 9, "vsite_uid": "19"}
+        '''
+        rpc_flow = {}
+        try:
+            flow = json.loads(self.request.body)
+            rpc_flow = {'cust_uid':flow['vsite_uid'], 'flows':[{'src':flow['src_ip'],
+                                'dst':flow['dst_ip'] if 'dst_ip' in flow else '', 'uid':flow['uid']}]}
+        except:
+            pass
+
+        resp = yield  self.do_query(microsrv_cust_url, 'ms_cust_update_flow', rpc_flow)
+        self.write('')
+        self.finish()
+
+    pass
 
 class customer_app(tornado.web.Application):
     def __init__(self):
@@ -243,11 +340,18 @@ class customer_app(tornado.web.Application):
 
 class swagger_app(swagger.Application):
     def __init__(self, topo_app):
-        handlers = [(r'/openoapi/sdno-vsite-mgr/v1/vsite/(.+)', vsite_get_handler),
-                    (r'/openoapi/sdno-vsite-mgr/v1/vsite', vsite_post_handler)]
-                    # (r'/openoapi/sdno-link_flow_monitor/v1/flows/(.+)', flow_rest_handler)]
+        settings = {
+            'static_path': os.path.join(os.path.dirname(__file__), 'sdno-vsite-mgr.swagger')
+        }
 
-        super(swagger_app, self).__init__(handlers)
+        handlers = [(r'/openoapi/sdno-vsite-mgr/v1/vsite/(.*)', vsite_get_handler),
+                    (r'/openoapi/sdno-vsite-mgr/v1/vsite', vsite_post_handler),
+                    (r'/openoapi/sdno-vsite-mgr/v1/flow/(.+)', flow_get_handler),
+                    (r'/openoapi/sdno-vsite-mgr/v1/flow', flow_post_handler),
+                    (r'/openoapi/sdno-vsite-mgr/v1/(swagger.json)', tornado.web.StaticFileHandler, dict(path=settings['static_path']))
+                    ]
+
+        super(swagger_app, self).__init__(handlers, **settings)
         self.topo_app = topo_app
         self.vlink_attrib_map = {'dequip':'ingress_node_uid', 'sequip':'egress_node_uid',
                                  'dport':'ingress_port_uid', 'sport':'egress_port_uid', 'bandwidth':'bandwidth',

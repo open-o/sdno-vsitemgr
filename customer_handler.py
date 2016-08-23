@@ -97,9 +97,9 @@ class ms_customer_handler(tornado.web.RequestHandler):
                 cs_map[uid] = one_c
             ip = str(c[6]) + '/' + str(c[7])
             if 'ips' in one_c:
-                one_c['ips'].append({'src':ip, 'uid':c[3]})
+                one_c['ips'].append({'src':ip, 'uid':str(c[3])})
             else:
-                one_c['ips'] = [{'src':ip,  'uid':c[3]}]
+                one_c['ips'] = [{'src':ip,  'uid':str(c[3])}]
             pass
 
         cs = [cs_map[c] for c in cs_map]

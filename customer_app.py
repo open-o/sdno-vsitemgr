@@ -54,7 +54,7 @@ class customer_app(tornado.web.Application):
         ic_map = {}
         for ip in res:
             nets = self.split_subnet(ip[2], ip[4], ip[5])
-            cust = {'uid':str(ip[6]), 'name':ip[7]}
+            cust = {'cust_uid':str(ip[6]), 'name':ip[7]}
 
             for n in nets:
                 ic_map[n] = cust
