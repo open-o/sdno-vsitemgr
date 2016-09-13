@@ -1,5 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#
+#  Copyright (c) 2016, China Telecommunication Co., Ltd.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
 from _mysql import result
 from MySQLdb.constants.CR import IPSOCK_ERROR
 
@@ -34,7 +50,7 @@ class ms_customer_handler(tornado.web.RequestHandler):
                           'ms_cust_update_flow':self.update_flow,
                           'ms_cust_set_flow_speed':self.set_flow_speed
                           }
-        self.log = 1
+        self.log = 0
         self.ip_cust_map = {}
         pass
 
@@ -46,7 +62,7 @@ class ms_customer_handler(tornado.web.RequestHandler):
         resp['ts'] = time.strftime("%Y%m%d%H%M%S")
         resp['trans_id'] = req['trans_id']
         resp['err_code'] = 0
-        resp['msg'] = 'Demo response'
+        resp['msg'] = ''
         self.set_header('Content-Type', 'application/json')
         return resp
     

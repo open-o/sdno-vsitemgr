@@ -1,5 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#
+#  Copyright (c) 2016, China Telecommunication Co., Ltd.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
 __author__ = 'liyiqun'
 
 import tornado.httpserver
@@ -341,14 +357,14 @@ class customer_app(tornado.web.Application):
 class swagger_app(swagger.Application):
     def __init__(self, topo_app):
         settings = {
-            'static_path': os.path.join(os.path.dirname(__file__), 'sdno-vsite-mgr.swagger')
+            'static_path': os.path.join(os.path.dirname(__file__), 'sdnovsitemgr.swagger')
         }
 
-        handlers = [(r'/openoapi/sdno-vsite-mgr/v1/vsite/(.*)', vsite_get_handler),
-                    (r'/openoapi/sdno-vsite-mgr/v1/vsite', vsite_post_handler),
-                    (r'/openoapi/sdno-vsite-mgr/v1/flow/(.+)', flow_get_handler),
-                    (r'/openoapi/sdno-vsite-mgr/v1/flow', flow_post_handler),
-                    (r'/openoapi/sdno-vsite-mgr/v1/(swagger.json)', tornado.web.StaticFileHandler, dict(path=settings['static_path']))
+        handlers = [(r'/openoapi/sdnovsitemgr/v1/vsite/(.*)', vsite_get_handler),
+                    (r'/openoapi/sdnovsitemgr/v1/vsite', vsite_post_handler),
+                    (r'/openoapi/sdnovsitemgr/v1/flow/(.+)', flow_get_handler),
+                    (r'/openoapi/sdnovsitemgr/v1/flow', flow_post_handler),
+                    (r'/openoapi/sdnovsitemgr/v1/(swagger.json)', tornado.web.StaticFileHandler, dict(path=settings['static_path']))
                     ]
 
         super(swagger_app, self).__init__(handlers, **settings)
@@ -359,7 +375,7 @@ class swagger_app(swagger.Application):
 
         tornado.ioloop.IOLoop.instance().add_timeout(
                         datetime.timedelta(milliseconds=500),
-                        openo_register, 'vsite_mgr', 'v1', '/openoapi/sdno-vsite-mgr/v1',
+                        openo_register, 'vsite_mgr', 'v1', '/openoapi/sdnovsitemgr/v1',
                         '127.0.0.1', te_cust_rest_port )
 
 
