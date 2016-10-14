@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-#  Copyright (c) 2016, China Telecommunication Co., Ltd.
+#  Copyright 2016 China Telecommunication Co., Ltd.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -379,9 +379,7 @@ class swagger_app(swagger.Application):
                         '127.0.0.1', te_cust_rest_port )
 
 
-
-if __name__ == '__main__':
-    tornado.options.parse_command_line()
+def launch():
     app = customer_app()
     server = tornado.httpserver.HTTPServer(app)
     server.listen(32771)
@@ -390,3 +388,7 @@ if __name__ == '__main__':
     server_swag.listen(te_cust_rest_port)
 
     tornado.ioloop.IOLoop.instance().start()
+
+if __name__ == '__main__':
+    tornado.options.parse_command_line()
+    launch()
