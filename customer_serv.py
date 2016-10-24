@@ -389,6 +389,20 @@ def launch():
 
     tornado.ioloop.IOLoop.instance().start()
 
+
+def strip_uniq_from_argv():
+    '''The --uniq is used to identify a process.
+
+    a.py --uniq=2837492392994857 argm argn ... argz
+    ps aux | grep "--uniq=2837492392994857" | awk '{print $2}' | xargs kill -9
+    '''
+
+    for a in sys.argv:
+        if a.startswith("--uniq="):
+            sys.argv.remove(a)
+
 if __name__ == '__main__':
+    strip_uniq_from_argv()
+
     tornado.options.parse_command_line()
     launch()
