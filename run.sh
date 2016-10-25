@@ -15,7 +15,16 @@
 #  limitations under the License.
 #
 
-PROC_UNIQ_KEY=0c54be48-73da-49bd-917b-e3a3853e3285
+MSB_ADDRESS="msb.openo.org:8086"
+SDNO_SDNO_VSITEMGR_ADDRESS="sdno-vsitemgr:8600"
 
+PROC_UNIQ_KEY=0c54be48-73da-49bd-917b-e3a3853e3285
 BASEDIR=$(dirname $(readlink -f $0))
-nohup python ${BASEDIR}/customer_serv.py --uniq=${PROC_UNIQ_KEY} &> /dev/null &
+
+OPTS=""
+OPTS+=" --uniq=${PROC_UNIQ_KEY}"
+OPTS+=" --msburl=${MSB_ADDRESS}"
+OPTS+=" --localurl=${SDNO_SDNO_VSITEMGR_ADDRESS}"
+
+nohup python ${BASEDIR}/customer_serv.py ${OPTS} &> /dev/null &
+nohup python ${BASEDIR}/customer_server.py ${OPTS} &> /dev/null &

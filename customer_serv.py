@@ -21,6 +21,7 @@ __author__ = 'liyiqun'
 import tornado.httpserver
 import tornado.ioloop
 import tornado.options
+from tornado.options import options
 import tornado.web
 import tornado.httpclient
 import tornado.gen
@@ -106,7 +107,7 @@ class customer_handler(tornado.web.RequestHandler):
                 return
 
             req_body = self.cust_subreq(req, self.subreq_map[req['request']])
-            http_req = tornado.httpclient.HTTPRequest(microsrv_cust_url ,method='POST', body = req_body)
+            http_req = tornado.httpclient.HTTPRequest(microsrvurl_dict['microsrv_cust_url'] ,method='POST', body = req_body)
             client = tornado.httpclient.AsyncHTTPClient()
             client.fetch(http_req, callback = self.cb_get_customer)
         except Exception, data:
@@ -150,7 +151,7 @@ class vsite_get_handler(base_handler):
         else:
             args = {}
         vsites = {}
-        resp = yield self.do_query(microsrv_cust_url,'ms_cust_get_customer', args )
+        resp = yield self.do_query(microsrvurl_dict['microsrv_cust_url'],'ms_cust_get_customer', args )
         try:
             result = resp['result']
             vsites = {'vsites':result['customers']} if 'customers' in result else {}
@@ -175,7 +176,7 @@ class vsite_get_handler(base_handler):
             @return 200: deleted ok.
         """
         args = {'uids':[x for x in vsite_uids.split(',')]}
-        resp = yield self.do_query(microsrv_cust_url,'ms_cust_del_customer', args)
+        resp = yield self.do_query(microsrvurl_dict['microsrv_cust_url'],'ms_cust_del_customer', args)
         self.write('')
         self.finish()
 
@@ -223,7 +224,7 @@ class vsite_post_handler(base_handler):
         except:
             pass
 
-        resp = yield  self.do_query(microsrv_cust_url, 'ms_cust_add_customer', vsite)
+        resp = yield  self.do_query(microsrvurl_dict['microsrv_cust_url'], 'ms_cust_add_customer', vsite)
         result = resp['result']
         if 'cust_uid' in result:
             uid['vsite_uid'] = result['cust_uid']
@@ -249,7 +250,7 @@ class vsite_post_handler(base_handler):
         except:
             pass
 
-        resp = yield  self.do_query(microsrv_cust_url, 'ms_cust_update_customer', vsite)
+        resp = yield  self.do_query(microsrvurl_dict['microsrv_cust_url'], 'ms_cust_update_customer', vsite)
         self.write('')
         self.finish()
 
@@ -270,7 +271,7 @@ class flow_get_handler(base_handler):
             @return 200: deleted ok.
         """
         fids = flow_uids.split(',')
-        resp = self.do_query(microsrv_cust_url, 'ms_cust_del_flow', {'flow_uids':fids})
+        resp = self.do_query(microsrvurl_dict['microsrv_cust_url'], 'ms_cust_del_flow', {'flow_uids':fids})
         self.write('')
         self.finish()
     pass
@@ -304,7 +305,7 @@ class flow_post_handler(base_handler):
 
         uid = {}
         if rpc_flow:
-            resp = yield  self.do_query(microsrv_cust_url, 'ms_cust_add_flow', rpc_flow)
+            resp = yield  self.do_query(microsrvurl_dict['microsrv_cust_url'], 'ms_cust_add_flow', rpc_flow)
             result = resp['result']
             if 'flows' in result:
                 uid['flow_uid'] = result['flows'][0]['uid']
@@ -333,7 +334,7 @@ class flow_post_handler(base_handler):
         except:
             pass
 
-        resp = yield  self.do_query(microsrv_cust_url, 'ms_cust_update_flow', rpc_flow)
+        resp = yield  self.do_query(microsrvurl_dict['microsrv_cust_url'], 'ms_cust_update_flow', rpc_flow)
         self.write('')
         self.finish()
 
@@ -376,7 +377,7 @@ class swagger_app(swagger.Application):
         tornado.ioloop.IOLoop.instance().add_timeout(
                         datetime.timedelta(milliseconds=500),
                         openo_register, 'vsite_mgr', 'v1', '/openoapi/sdnovsitemgr/v1',
-                        '127.0.0.1', te_cust_rest_port )
+                        microsrvurl_dict['te_cust_rest_host'], microsrvurl_dict['te_cust_rest_port'] )
 
 
 def launch():
@@ -385,24 +386,25 @@ def launch():
     server.listen(32771)
     swag = swagger_app(app)    # For REST interface
     server_swag = tornado.httpserver.HTTPServer(swag)
-    server_swag.listen(te_cust_rest_port)
+    server_swag.listen(microsrvurl_dict['te_cust_rest_port'])
 
     tornado.ioloop.IOLoop.instance().start()
 
 
-def strip_uniq_from_argv():
-    '''The --uniq is used to identify a process.
+def strip_parse_from_argv():
+    options.define("uniq", default="2837492392992771", help="service unique id")
+    options.define("localurl", default=microsrvurl_dict['te_cust_rest_host'] + te_host_port_divider + str(microsrvurl_dict['te_cust_rest_port']), help="service host:port")
+    options.define("msburl", default=microsrvurl_dict['te_msb_rest_host'] + te_host_port_divider + str(microsrvurl_dict['te_msb_rest_port']), help="micro service bus host:port")
+    tornado.options.parse_command_line()
+    microsrvurl_dict['te_cust_rest_host'] = options.localurl.split(':')[0]
+    microsrvurl_dict['te_cust_rest_port'] = int(options.localurl.split(':')[1])
+    microsrvurl_dict['openo_ms_url'] = te_protocol + options.msburl + openo_ms_url_prefix
+    microsrvurl_dict['openo_dm_url'] = te_protocol + options.msburl + openo_dm_url_prefix
+    microsrvurl_dict['openo_esr_url'] = te_protocol + options.msburl + openo_esr_url_prefix
+    microsrvurl_dict['openo_brs_url'] = te_protocol + options.msburl + openo_brs_url_prefix
 
-    a.py --uniq=2837492392994857 argm argn ... argz
-    ps aux | grep "--uniq=2837492392994857" | awk '{print $2}' | xargs kill -9
-    '''
-
-    for a in sys.argv:
-        if a.startswith("--uniq="):
-            sys.argv.remove(a)
+    pass
 
 if __name__ == '__main__':
-    strip_uniq_from_argv()
-
-    tornado.options.parse_command_line()
+    strip_parse_from_argv()
     launch()
