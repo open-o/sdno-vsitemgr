@@ -1,3 +1,4 @@
+<?xml version="1.0"?>
 <!--
     Copyright 2016 China Telecommunication Co., Ltd.
 
@@ -26,7 +27,7 @@
     <groupId>org.openo.sdno.vsitemgr</groupId>
     <artifactId>ct_vsitemgr</artifactId>
     <packaging>pom</packaging>
-    <name>ct_vsitemgr</name>
+    <name>sdno-vsitemgr</name>
     <description>VSite Manager</description>
     <build>
       <defaultGoal>package</defaultGoal>
