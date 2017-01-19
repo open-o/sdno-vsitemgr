@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-#  Copyright 2016 China Telecommunication Co., Ltd.
+#  Copyright 2016-2017 China Telecommunication Co., Ltd.
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -40,9 +40,9 @@ def get_mask_int(mask):
 class ms_customer_handler(tornado.web.RequestHandler):
     def initialize(self):
         super(ms_customer_handler, self).initialize()
-        self.resp_func = {'ms_cust_get_customer':self.get_customer, 
+        self.resp_func = {'ms_cust_get_customer':self.get_customer,
                           'ms_cust_add_customer':self.add_customer,
-                          'ms_cust_del_customer':self.del_customer, 
+                          'ms_cust_del_customer':self.del_customer,
                           'ms_cust_update_customer':self.update_customer,
                           'ms_cust_get_customer_by_ip':self.get_customer_by_ip,
                           'ms_cust_add_flow':self.add_flow,
@@ -65,7 +65,7 @@ class ms_customer_handler(tornado.web.RequestHandler):
         resp['msg'] = ''
         self.set_header('Content-Type', 'application/json')
         return resp
-    
+
     def post(self):
         ctnt = self.request.body
         if self.log == 1:
@@ -135,7 +135,7 @@ class ms_customer_handler(tornado.web.RequestHandler):
             db.commit()
         db.close()
         return result
-    
+
     def add_customer(self, args):
         customer = {}
         customer['name'] = args['name']
@@ -166,14 +166,14 @@ class ms_customer_handler(tornado.web.RequestHandler):
                     db.commit()
         db.close()
         return {"cust_uid": customer_id}
-    
+
     def update_customer(self,args):
         customer = {}
         name = args['name']
         uid = args['uid']
         if args.has_key('ips'):
             ips = args['ips']
-            
+
         #check if customer exist
         sql_str = 'select * from t_customer where id = %s' % uid
 
@@ -196,9 +196,9 @@ class ms_customer_handler(tornado.web.RequestHandler):
         # To pzhang: Are you crazy?
         # self.del_customer(args)
         # self.add_customer(args)
-        
+
         pass
-    
+
     def get_customer_by_ip(self, args):
         ips = args['ips']
         cs = {}
@@ -239,7 +239,7 @@ class ms_customer_handler(tornado.web.RequestHandler):
         db = mysql_utils('customer')
         result = db.exec_sql(sql_str)
         if not result:
-            return 
+            return
 
         #insert into t_customer_ip values (1, 1, 16843009, '1.1.1.0', 4294967040, '255.255.255.0');
         flows = []
@@ -274,7 +274,7 @@ class ms_customer_handler(tornado.web.RequestHandler):
             db.commit()
         db.close()
         return result
-    
+
     def update_flow(self,args):
         flows = args['flows']
         db = mysql_utils('customer')
@@ -292,6 +292,6 @@ class ms_customer_handler(tornado.web.RequestHandler):
             pass
         db.close()
         pass
-    
+
     def set_flow_speed(self,args):
         pass
