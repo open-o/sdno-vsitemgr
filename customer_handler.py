@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  Copyright 2016-2017 China Telecommunication Co., Ltd.
@@ -112,10 +112,12 @@ class ms_customer_handler(tornado.web.RequestHandler):
                 one_c = {'uid':str(c[0]), 'name':c[1] }
                 cs_map[uid] = one_c
             ip = str(c[6]) + '/' + str(c[7])
+
+            #FIXME: src and dst.
             if 'ips' in one_c:
-                one_c['ips'].append({'src':ip, 'uid':str(c[3])})
+                one_c['ips'].append({'dst':ip, 'src':ip, 'uid':str(c[3])})
             else:
-                one_c['ips'] = [{'src':ip,  'uid':str(c[3])}]
+                one_c['ips'] = [{'dst':ip, 'src':ip, 'uid':str(c[3])}]
             pass
 
         cs = [cs_map[c] for c in cs_map]

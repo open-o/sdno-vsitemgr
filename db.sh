@@ -14,4 +14,4 @@
 #  limitations under the License.
 #
 
-mysql -uroot -proot -e "drop database if exists customer; create database customer;source ./db.sql;"
+mysql -uroot -proot -e "drop database if exists customer; create database customer; use customer; source ./db.sql;"

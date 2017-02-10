@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  Copyright 2016-2017 China Telecommunication Co., Ltd.
@@ -84,7 +84,7 @@ class base_rpc(object):
                 request.add_header('Accept-encoding', 'gzip')
 
             opener = urllib2.build_opener(RedirectHandler)
-            response = opener.open(request, json_obj)
+            response = opener.open(request, json_obj, timeout=20)
             data = response.read()
             hdr = response.headers.get('Content-Encoding')
             if hdr:

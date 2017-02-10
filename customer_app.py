@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  Copyright 2016-2017 China Telecommunication Co., Ltd.
@@ -77,7 +77,7 @@ class customer_app(tornado.web.Application):
 
         self.ip_cust_map = ic_map
         tornado.ioloop.IOLoop.instance().add_timeout(
-                        datetime.timedelta(milliseconds=100000),
+                        datetime.timedelta(milliseconds=1000*60*5),
                         self.load_ip_cust_map)
 
         pass

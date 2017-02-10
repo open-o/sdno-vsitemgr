@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  Copyright 2016-2017 China Telecommunication Co., Ltd.
@@ -245,7 +245,7 @@ class ms_topo_handler(tornado.web.RequestHandler):
     def get_vlinks(self, arg):
         vl = {}
         # FIXME:
-        return {'vlinks':[]}
+        # return {'vlinks':[]}
         vls = []
 
         #ports are 1000_0~1000_3, 1001_0~1001_3, 1002_0~1002_3

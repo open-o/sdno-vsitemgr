@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 #  Copyright 2016-2017 China Telecommunication Co., Ltd.
@@ -21,7 +21,7 @@ from DBUtils.PooledDB import PooledDB
 
 class mysql_utils(object):
     __pool = {}
-    dbhost = '10.9.63.208'
+    dbhost = 'localhost'
     dbusr = 'root'
     dbpwd = 'root'
     dbport = 3306
