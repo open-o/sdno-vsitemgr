@@ -307,7 +307,7 @@ class flow_post_handler(base_handler):
         if rpc_flow:
             resp = yield  self.do_query(microsrvurl_dict['microsrv_cust_url'], 'ms_cust_add_flow', rpc_flow)
             result = resp['result']
-            if 'flows' in result:
+            if result is not None and 'flows' in result:
                 uid['flow_uid'] = result['flows'][0]['uid']
         self.write(json.dumps(uid))
         self.finish()

@@ -26,5 +26,11 @@ OPTS+=" --uniq=${PROC_UNIQ_KEY}"
 OPTS+=" --msburl=${MSB_ADDRESS}"
 OPTS+=" --localurl=${SDNO_SDNO_VSITEMGR_ADDRESS}"
 
-nohup python ${BASEDIR}/customer_serv.py ${OPTS} &> /dev/null &
-nohup python ${BASEDIR}/customer_server.py ${OPTS} &> /dev/null &
+if [ "$CSIT" == "True" ]; then 
+    nohup coverage run --parallel-mode ${BASEDIR}/customer_serv.py ${OPTS} &> /dev/null &
+    nohup coverage run --parallel-mode ${BASEDIR}/customer_server.py ${OPTS} &> /dev/null &
+    nohup python ${BASEDIR}/test.py ${OPTS}  &
+else
+    nohup python ${BASEDIR}/customer_serv.py ${OPTS} &> /dev/null &
+    nohup python ${BASEDIR}/customer_server.py ${OPTS} &> /dev/null &
+fi
